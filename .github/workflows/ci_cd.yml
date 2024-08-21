@@ -1,0 +1,49 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ "flutterflow" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2.5.0
+      with:
+        flutter-version: 3.22.2
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+        cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
+        architecture: x64
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build Web
+      run: flutter build web
+
+    - name: Copiar arquivos para VPS
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: root
+        password: ${{ secrets.PASSWORD }}
+        port: 22
+        source: build/web
+        target: /root/pideaqui
+
+    - name: Mueve la carpeta para App 
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: root
+        password: ${{ secrets.PASSWORD }}
+        port: 22
+        script: |
+          rm -rf /root/pideaqui/app
+          mv /root/pideaqui/build/web /root/pideaqui/app
+          rm -rf /root/pideaqui/build

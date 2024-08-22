@@ -47,3 +47,4 @@ jobs:
           rm -rf /root/pideaqui/app
           mv /root/pideaqui/build/web /root/pideaqui/app
           rm -rf /root/pideaqui/build
+          chmod -R 777 /root/pideaqui/app/*

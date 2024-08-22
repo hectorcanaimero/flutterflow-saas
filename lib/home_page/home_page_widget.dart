@@ -1,7 +1,10 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/random_data_util.dart' as random_data;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:provider/provider.dart';
 import 'home_page_model.dart';
 export 'home_page_model.dart';
 
@@ -22,6 +25,13 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     super.initState();
     _model = createModel(context, () => HomePageModel());
 
+    // On page load action.
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      _model.domain = await actions.getSubDomain();
+      FFAppState().subdomain = _model.domain!;
+      setState(() {});
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
   }
 
@@ -34,6 +44,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -108,7 +120,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                               width: double.infinity,
                               decoration: const BoxDecoration(),
                               child: Text(
-                                'Hello World',
+                                valueOrDefault<String>(
+                                  FFAppState().subdomain,
+                                  'Subdominio',
+                                ),
                                 textAlign: TextAlign.start,
                                 style: FlutterFlowTheme.of(context)
                                     .headlineMedium
